@@ -1,0 +1,44 @@
+version: '3.1'
+
+services:
+  # Database
+  db:
+    image: mysql
+    #command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+    networks:
+      - wpsite
+  # phpmyadmin
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - '8080:80'
+    networks:
+      - wpsite
+  # Wordpress
+  webserver:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - '8000:80'
+    restart: always
+    links:
+        - "db:wordpress"
+    volumes: ['.:/var/www/html']
+    networks:
+      - wpsite
+networks:
+  wpsite:
+volumes:
+  db_data:
